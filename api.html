@@ -1,0 +1,615 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>TFPM API Documentation</title>
+    <link rel="stylesheet" type="text/css" href="https://unpkg.com/swagger-ui-dist@5/swagger-ui.css">
+    <style>
+        html { box-sizing: border-box; overflow: -moz-scrollbars-vertical; overflow-y: scroll; }
+        *, *:before, *:after { box-sizing: inherit; }
+        body { margin:0; background: #fafafa; }
+    </style>
+</head>
+<body>
+    <div id="swagger-ui"></div>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-bundle.js"> </script>
+    <script src="https://unpkg.com/swagger-ui-dist@5/swagger-ui-standalone-preset.js"> </script>
+    <script>
+    window.onload = function() {
+        const ui = SwaggerUIBundle({
+            spec: {
+                "openapi": "3.0.0",
+                "info": {
+                    "title": "Track and Field Project Management (TFPM) API",
+                    "version": "1.0.0",
+                    "description": "A comprehensive API for managing projects, inventory, and tracked items for manufacturing and assembly."
+                },
+                "servers": [
+                    {
+                        "url": "http://localhost:3000",
+                        "description": "Development server"
+                    }
+                ],
+                "tags": [
+                    { "name": "Projects", "description": "Manage product lines or project types" },
+                    { "name": "Inventory", "description": "Manage parts, materials, and components" },
+                    { "name": "Tracked Items", "description": "Manage individual units being produced" },
+                    { "name": "Attributes", "description": "Define custom fields for tracked items" },
+                    { "name": "Steps", "description": "Define the production/assembly steps for a project" },
+                    { "name": "Views", "description": "Pre-defined database views for reporting" }
+                ],
+                "paths": {
+                    "/api/projects": {
+                        "get": {
+                            "tags": ["Projects"],
+                            "summary": "Get all projects",
+                            "description": "Returns a list of all projects.",
+                            "responses": {
+                                "200": {
+                                    "description": "A JSON array of projects",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "array",
+                                                "items": { "$ref": "#/components/schemas/Project" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "post": {
+                            "tags": ["Projects"],
+                            "summary": "Create a new project",
+                            "description": "Creates a new project.",
+                            "requestBody": {
+                                "required": true,
+                                "content": {
+                                    "application/json": {
+                                        "schema": { "$ref": "#/components/schemas/NewProject" }
+                                    }
+                                }
+                            },
+                            "responses": {
+                                "200": { "description": "Project created successfully" },
+                                "400": { "description": "Invalid input" }
+                            }
+                        }
+                    },
+                    "/api/projects/{id}": {
+                        "get": {
+                            "tags": ["Projects"],
+                            "summary": "Get a single project by ID",
+                            "parameters": [
+                                { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "responses": {
+                                "200": {
+                                    "description": "A single project object",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": { "$ref": "#/components/schemas/Project" }
+                                        }
+                                    }
+                                },
+                                "404": { "description": "Project not found" }
+                            }
+                        },
+                        "put": {
+                            "tags": ["Projects"],
+                            "summary": "Update an existing project",
+                            "parameters": [
+                                { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "requestBody": {
+                                "required": true,
+                                "content": {
+                                    "application/json": {
+                                        "schema": { "$ref": "#/components/schemas/NewProject" }
+                                    }
+                                }
+                            },
+                            "responses": {
+                                "200": { "description": "Project updated successfully" },
+                                "400": { "description": "Invalid input" },
+                                "404": { "description": "Project not found" }
+                            }
+                        }
+                    },
+                    "/api/projects/{projectId}/attributes": {
+                        "get": {
+                            "tags": ["Attributes"],
+                            "summary": "Get all attribute definitions for a project",
+                            "parameters": [
+                                { "name": "projectId", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "responses": {
+                                "200": {
+                                    "description": "A JSON array of attribute definitions",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "array",
+                                                "items": { "$ref": "#/components/schemas/AttributeDefinition" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "/api/attributes": {
+                        "post": {
+                            "tags": ["Attributes"],
+                            "summary": "Create a new attribute definition",
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": { "$ref": "#/components/schemas/NewAttributeDefinition" }
+                                    }
+                                }
+                            },
+                            "responses": { "200": { "description": "Attribute definition created" } }
+                        }
+                    },
+                    "/api/attributes/{id}": {
+                        "put": {
+                            "tags": ["Attributes"],
+                            "summary": "Update an attribute definition",
+                            "parameters": [
+                                { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": { "$ref": "#/components/schemas/NewAttributeDefinition" }
+                                    }
+                                }
+                            },
+                            "responses": { "200": { "description": "Attribute definition updated" } }
+                        },
+                        "delete": {
+                            "tags": ["Attributes"],
+                            "summary": "Delete an attribute definition",
+                            "parameters": [
+                                { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "responses": { "200": { "description": "Attribute definition deleted" } }
+                        }
+                    },
+                    "/api/projects/{projectId}/steps": {
+                        "get": {
+                            "tags": ["Steps"],
+                            "summary": "Get all steps for a project",
+                            "parameters": [
+                                { "name": "projectId", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "responses": {
+                                "200": {
+                                    "description": "A JSON array of project steps",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "array",
+                                                "items": { "$ref": "#/components/schemas/ProjectStep" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "/api/steps": {
+                        "post": {
+                            "tags": ["Steps"],
+                            "summary": "Create a new project step",
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": { "$ref": "#/components/schemas/NewProjectStep" }
+                                    }
+                                }
+                            },
+                            "responses": { "200": { "description": "Project step created" } }
+                        }
+                    },
+                    "/api/steps/{id}": {
+                        "put": {
+                            "tags": ["Steps"],
+                            "summary": "Update a project step",
+                            "parameters": [
+                                { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": { "$ref": "#/components/schemas/NewProjectStep" }
+                                    }
+                                }
+                            },
+                            "responses": { "200": { "description": "Project step updated" } }
+                        },
+                        "delete": {
+                            "tags": ["Steps"],
+                            "summary": "Delete a project step",
+                            "parameters": [
+                                { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "responses": { "200": { "description": "Project step deleted" } }
+                        }
+                    },
+                    "/api/inventory-items": {
+                        "get": {
+                            "tags": ["Inventory"],
+                            "summary": "Get all inventory items",
+                            "responses": {
+                                "200": {
+                                    "description": "A JSON array of inventory items",
+                                    "content": {
+                                        "application/json": {
+                                            "schema": {
+                                                "type": "array",
+                                                "items": { "$ref": "#/components/schemas/InventoryItem" }
+                                            }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "post": {
+                            "tags": ["Inventory"],
+                            "summary": "Create a new inventory item",
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": { "$ref": "#/components/schemas/NewInventoryItem" }
+                                    }
+                                }
+                            },
+                            "responses": { "200": { "description": "Inventory item created" } }
+                        }
+                    },
+                    "/api/inventory-items/{id}": {
+                        "get": {
+                            "tags": ["Inventory"],
+                            "summary": "Get a single inventory item by ID",
+                            "parameters": [
+                                { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "responses": {
+                                "200": {
+                                    "content": {
+                                        "application/json": {
+                                            "schema": { "$ref": "#/components/schemas/InventoryItem" }
+                                        }
+                                    }
+                                },
+                                "404": { "description": "Inventory item not found" }
+                            }
+                        },
+                        "put": {
+                            "tags": ["Inventory"],
+                            "summary": "Update an inventory item",
+                            "parameters": [
+                                { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": { "$ref": "#/components/schemas/NewInventoryItem" }
+                                    }
+                                }
+                            },
+                            "responses": { "200": { "description": "Inventory item updated" } }
+                        }
+                    },
+                    "/api/inventory-items/adjust": {
+                        "post": {
+                            "tags": ["Inventory"],
+                            "summary": "Adjust inventory stock",
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "inventory_item_id": { "type": "integer" },
+                                                "quantity_changed": { "type": "number" },
+                                                "user_name": { "type": "string" },
+                                                "notes": { "type": "string" }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "responses": { "200": { "description": "Stock adjusted" } }
+                        }
+                    },
+                    "/api/tracked-items": {
+                        "post": {
+                            "tags": ["Tracked Items"],
+                            "summary": "Create a new tracked item",
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": { "$ref": "#/components/schemas/NewTrackedItem" }
+                                    }
+                                }
+                            },
+                            "responses": { "200": { "description": "Tracked item created" } }
+                        }
+                    },
+                    "/api/tracked-items/{id}": {
+                        "get": {
+                            "tags": ["Tracked Items"],
+                            "summary": "Get full details for a single tracked item",
+                            "parameters": [
+                                { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "responses": {
+                                "200": {
+                                    "content": {
+                                        "application/json": {
+                                            "schema": { "$ref": "#/components/schemas/TrackedItem" }
+                                        }
+                                    }
+                                }
+                            }
+                        }
+                    },
+                    "/api/tracked-items/{id}/attributes": {
+                        "post": {
+                            "tags": ["Tracked Items"],
+                            "summary": "Save attribute values for a tracked item",
+                            "parameters": [
+                                { "name": "id", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": {
+                                            "type": "object",
+                                            "properties": {
+                                                "attributes": {
+                                                    "type": "array",
+                                                    "items": {
+                                                        "type": "object",
+                                                        "properties": {
+                                                            "attribute_definition_id": { "type": "integer" },
+                                                            "attribute_value": { "type": "string" }
+                                                        }
+                                                    }
+                                                }
+                                            }
+                                        }
+                                    }
+                                }
+                            },
+                            "responses": { "200": { "description": "Attributes updated" } }
+                        }
+                    },
+                    "/api/tracked-items/{itemId}/steps/{stepId}": {
+                        "post": {
+                            "tags": ["Tracked Items"],
+                            "summary": "Update the progress of a single step for a tracked item",
+                            "parameters": [
+                                { "name": "itemId", "in": "path", "required": true, "schema": { "type": "integer" } },
+                                { "name": "stepId", "in": "path", "required": true, "schema": { "type": "integer" } }
+                            ],
+                            "requestBody": {
+                                "content": {
+                                    "application/json": {
+                                        "schema": { "$ref": "#/components/schemas/StepProgressUpdate" }
+                                    }
+                                }
+                            },
+                            "responses": { "200": { "description": "Step progress updated" } }
+                        }
+                    },
+                    "/api/views/inventory-stock-status": {
+                        "get": {
+                            "tags": ["Views"],
+                            "summary": "Get inventory stock status view",
+                            "responses": {
+                                "200": { "description": "Success" }
+                            }
+                        }
+                    },
+                    "/api/views/tracked-items-overview": {
+                        "get": {
+                            "tags": ["Views"],
+                            "summary": "Get tracked items overview view",
+                            "responses": {
+                                "200": { "description": "Success" }
+                            }
+                        }
+                    },
+                    "/api/views/step-progress-status": {
+                        "get": {
+                            "tags": ["Views"],
+                            "summary": "Get step progress status view",
+                            "responses": {
+                                "200": { "description": "Success" }
+                            }
+                        }
+                    }
+                },
+                "components": {
+                    "schemas": {
+                        "Project": {
+                            "type": "object",
+                            "properties": {
+                                "project_id": { "type": "integer" },
+                                "project_name": { "type": "string" },
+                                "project_description": { "type": "string" },
+                                "status": { "type": "string" },
+                                "date_created": { "type": "string", "format": "date-time" },
+                                "last_modified": { "type": "string", "format": "date-time" }
+                            }
+                        },
+                        "NewProject": {
+                            "type": "object",
+                            "properties": {
+                                "project_name": { "type": "string" },
+                                "project_description": { "type": "string" },
+                                "status": { "type": "string" }
+                            }
+                        },
+                        "InventoryItem": {
+                            "type": "object",
+                            "properties": {
+                                "inventory_item_id": { "type": "integer" },
+                                "item_name": { "type": "string" },
+                                "part_number": { "type": "string" },
+                                "description": { "type": "string" },
+                                "unit_of_measure": { "type": "string" },
+                                "current_stock_level": { "type": "number" },
+                                "reorder_point": { "type": "number" },
+                                "supplier_info": { "type": "string" },
+                                "cost_per_unit": { "type": "number" }
+                            }
+                        },
+                        "NewInventoryItem": {
+                            "type": "object",
+                            "properties": {
+                                "item_name": { "type": "string" },
+                                "part_number": { "type": "string" },
+                                "description": { "type": "string" },
+                                "unit_of_measure": { "type": "string" },
+                                "current_stock_level": { "type": "number" },
+                                "reorder_point": { "type": "number" },
+                                "supplier_info": { "type": "string" },
+                                "cost_per_unit": { "type": "number" }
+                            }
+                        },
+                        "TrackedItem": {
+                            "type": "object",
+                            "properties": {
+                                "item_id": { "type": "integer" },
+                                "project_id": { "type": "integer" },
+                                "current_overall_status": { "type": "string" },
+                                "is_shipped": { "type": "boolean" },
+                                "shipped_date": { "type": "string", "format": "date-time" },
+                                "date_fully_completed": { "type": "string", "format": "date-time" },
+                                "notes": { "type": "string" },
+                                "attributes": {
+                                    "type": "array",
+                                    "items": { "$ref": "#/components/schemas/AttributeValue" }
+                                },
+                                "steps": {
+                                    "type": "array",
+                                    "items": { "$ref": "#/components/schemas/StepProgress" }
+                                }
+                            }
+                        },
+                        "NewTrackedItem": {
+                            "type": "object",
+                            "properties": {
+                                "project_id": { "type": "integer" },
+                                "current_overall_status": { "type": "string" },
+                                "notes": { "type": "string" },
+                                "attributes": {
+                                    "type": "array",
+                                    "items": {
+                                        "type": "object",
+                                        "properties": {
+                                            "attribute_definition_id": { "type": "integer" },
+                                            "attribute_value": { "type": "string" }
+                                        }
+                                    }
+                                }
+                            }
+                        },
+                        "AttributeDefinition": {
+                            "type": "object",
+                            "properties": {
+                                "attribute_definition_id": { "type": "integer" },
+                                "project_id": { "type": "integer" },
+                                "attribute_name": { "type": "string" },
+                                "attribute_type": { "type": "string" },
+                                "display_order": { "type": "integer" },
+                                "is_required": { "type": "boolean" }
+                            }
+                        },
+                        "NewAttributeDefinition": {
+                            "type": "object",
+                            "properties": {
+                                "project_id": { "type": "integer" },
+                                "attribute_name": { "type": "string" },
+                                "attribute_type": { "type": "string" },
+                                "display_order": { "type": "integer" },
+                                "is_required": { "type": "boolean" }
+                            }
+                        },
+                        "ProjectStep": {
+                            "type": "object",
+                            "properties": {
+                                "step_id": { "type": "integer" },
+                                "project_id": { "type": "integer" },
+                                "step_code": { "type": "string" },
+                                "step_name": { "type": "string" },
+                                "step_description": { "type": "string" },
+                                "step_order": { "type": "integer" }
+                            }
+                        },
+                        "NewProjectStep": {
+                            "type": "object",
+                            "properties": {
+                                "project_id": { "type": "integer" },
+                                "step_code": { "type": "string" },
+                                "step_name": { "type": "string" },
+                                "step_description": { "type": "string" },
+                                "step_order": { "type": "integer" }
+                            }
+                        },
+                        "AttributeValue": {
+                            "type": "object",
+                            "properties": {
+                                "attribute_definition_id": { "type": "integer" },
+                                "attribute_name": { "type": "string" },
+                                "attribute_type": { "type": "string" },
+                                "is_required": { "type": "boolean" },
+                                "attribute_value": { "type": "string" }
+                            }
+                        },
+                        "StepProgress": {
+                            "type": "object",
+                            "properties": {
+                                "step_id": { "type": "integer" },
+                                "step_name": { "type": "string" },
+                                "step_order": { "type": "integer" },
+                                "status": { "type": "string" },
+                                "start_timestamp": { "type": "string", "format": "date-time" },
+                                "completion_timestamp": { "type": "string", "format": "date-time" },
+                                "completed_by_user_name": { "type": "string" },
+                                "step_notes": { "type": "string" }
+                            }
+                        },
+                        "StepProgressUpdate": {
+                            "type": "object",
+                            "properties": {
+                                "status": { "type": "string" },
+                                "start_timestamp": { "type": "string", "format": "date-time" },
+                                "completion_timestamp": { "type": "string", "format": "date-time" },
+                                "completed_by_user_name": { "type": "string" },
+                                "notes": { "type": "string" }
+                            }
+                        }
+                    }
+                }
+            },
+            dom_id: '#swagger-ui',
+            deepLinking: true,
+            presets: [
+                SwaggerUIBundle.presets.apis,
+                SwaggerUIStandalonePreset
+            ],
+            plugins: [
+                SwaggerUIBundle.plugins.DownloadUrl
+            ],
+            layout: "StandaloneLayout"
+        });
+    }
+    </script>
+</body>
+</html>

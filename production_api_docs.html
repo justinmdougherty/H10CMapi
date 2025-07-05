@@ -1,0 +1,1383 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Production Management API Documentation</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+        }
+
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            padding: 2rem;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 3rem;
+            color: white;
+        }
+
+        .header h1 {
+            font-size: 3rem;
+            margin-bottom: 1rem;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            font-size: 1.2rem;
+            opacity: 0.9;
+        }
+
+        .docs-container {
+            background: white;
+            border-radius: 15px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            overflow: hidden;
+        }
+
+        .nav {
+            background: #f8f9fa;
+            padding: 1.5rem;
+            border-bottom: 1px solid #e9ecef;
+        }
+
+        .nav h2 {
+            margin-bottom: 1rem;
+            color: #495057;
+        }
+
+        .nav-links {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 0.5rem;
+        }
+
+        .nav-link {
+            background: #6c757d;
+            color: white;
+            padding: 0.5rem 1rem;
+            border-radius: 25px;
+            text-decoration: none;
+            font-size: 0.9rem;
+            transition: all 0.3s ease;
+        }
+
+        .nav-link:hover, .nav-link.active {
+            background: #495057;
+            transform: translateY(-2px);
+        }
+
+        .content {
+            padding: 2rem;
+        }
+
+        .section {
+            display: none;
+            animation: fadeIn 0.5s ease-in;
+        }
+
+        .section.active {
+            display: block;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .endpoint-group {
+            margin-bottom: 3rem;
+        }
+
+        .endpoint-group h3 {
+            color: #495057;
+            margin-bottom: 1.5rem;
+            padding-bottom: 0.5rem;
+            border-bottom: 2px solid #e9ecef;
+        }
+
+        .endpoint {
+            background: #f8f9fa;
+            border: 1px solid #e9ecef;
+            border-radius: 8px;
+            margin-bottom: 1.5rem;
+            overflow: hidden;
+            transition: all 0.3s ease;
+        }
+
+        .endpoint:hover {
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        }
+
+        .endpoint-header {
+            background: white;
+            padding: 1rem 1.5rem;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            gap: 1rem;
+        }
+
+        .method {
+            padding: 0.3rem 0.8rem;
+            border-radius: 4px;
+            font-weight: bold;
+            font-size: 0.8rem;
+            min-width: 60px;
+            text-align: center;
+        }
+
+        .method.get { background: #d4edda; color: #155724; }
+        .method.post { background: #cce5ff; color: #004085; }
+        .method.put { background: #fff3cd; color: #856404; }
+        .method.delete { background: #f8d7da; color: #721c24; }
+
+        .endpoint-path {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-weight: 500;
+            flex: 1;
+        }
+
+        .endpoint-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .toggle-icon {
+            transition: transform 0.3s ease;
+        }
+
+        .endpoint.expanded .toggle-icon {
+            transform: rotate(180deg);
+        }
+
+        .endpoint-details {
+            padding: 1.5rem;
+            border-top: 1px solid #e9ecef;
+            display: none;
+        }
+
+        .endpoint.expanded .endpoint-details {
+            display: block;
+        }
+
+        .params-section, .response-section {
+            margin-bottom: 1.5rem;
+        }
+
+        .params-section h5, .response-section h5 {
+            margin-bottom: 0.8rem;
+            color: #495057;
+        }
+
+        .param {
+            background: white;
+            border: 1px solid #e9ecef;
+            border-radius: 4px;
+            padding: 0.8rem;
+            margin-bottom: 0.5rem;
+        }
+
+        .param-header {
+            display: flex;
+            align-items: center;
+            gap: 0.5rem;
+            margin-bottom: 0.3rem;
+        }
+
+        .param-name {
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-weight: bold;
+            color: #495057;
+        }
+
+        .param-type {
+            background: #e9ecef;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-size: 0.8rem;
+            color: #6c757d;
+        }
+
+        .param-required {
+            background: #dc3545;
+            color: white;
+            padding: 0.1rem 0.4rem;
+            border-radius: 3px;
+            font-size: 0.7rem;
+        }
+
+        .param-description {
+            color: #6c757d;
+            font-size: 0.9rem;
+        }
+
+        .code-block {
+            background: #2d3748;
+            color: #e2e8f0;
+            padding: 1rem;
+            border-radius: 4px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.9rem;
+            overflow-x: auto;
+            white-space: pre;
+        }
+
+        .status-code {
+            display: inline-block;
+            padding: 0.2rem 0.5rem;
+            border-radius: 3px;
+            font-family: 'Monaco', 'Menlo', monospace;
+            font-size: 0.8rem;
+            margin-right: 0.5rem;
+        }
+
+        .status-200 { background: #d4edda; color: #155724; }
+        .status-400 { background: #fff3cd; color: #856404; }
+        .status-404 { background: #f8d7da; color: #721c24; }
+        .status-500 { background: #f8d7da; color: #721c24; }
+
+        .info-box {
+            background: #cce5ff;
+            border: 1px solid #b3d9ff;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        .warning-box {
+            background: #fff3cd;
+            border: 1px solid #ffeaa7;
+            border-radius: 4px;
+            padding: 1rem;
+            margin: 1rem 0;
+        }
+
+        @media (max-width: 768px) {
+            .container {
+                padding: 1rem;
+            }
+
+            .header h1 {
+                font-size: 2rem;
+            }
+
+            .nav-links {
+                flex-direction: column;
+            }
+
+            .endpoint-header {
+                flex-direction: column;
+                align-items: flex-start;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>🏭 Production Management API</h1>
+            <p>Complete REST API for managing production projects, batches, units, and inventory</p>
+        </div>
+
+        <div class="docs-container">
+            <div class="nav">
+                <h2>Quick Navigation</h2>
+                <div class="nav-links">
+                    <a href="#overview" class="nav-link active">Overview</a>
+                    <a href="#projects" class="nav-link">Projects</a>
+                    <a href="#steps" class="nav-link">Steps</a>
+                    <a href="#batches" class="nav-link">Batches</a>
+                    <a href="#units" class="nav-link">Units</a>
+                    <a href="#inventory" class="nav-link">Inventory</a>
+                    <a href="#reporting" class="nav-link">Reporting</a>
+                    <a href="#utilities" class="nav-link">Utilities</a>
+                </div>
+            </div>
+
+            <div class="content">
+                <!-- Overview Section -->
+                <div id="overview" class="section active">
+                    <h2>API Overview</h2>
+                    
+                    <div class="info-box">
+                        <h4>🚀 Base URL</h4>
+                        <code>http://localhost:3000/api</code>
+                    </div>
+
+                    <div class="info-box">
+                        <h4>📋 Response Format</h4>
+                        <p>All responses follow a consistent JSON format:</p>
+                        <div class="code-block">{
+  "success": boolean,
+  "message": "string",
+  "data": object | array | null,
+  "error": "string (only on failure)"
+}</div>
+                    </div>
+
+                    <div class="warning-box">
+                        <h4>⚠️ Authentication</h4>
+                        <p>All endpoints require a <code>userID</code> field for tracking who performed the action. This is typically passed in the request body as <code>createdByUserID</code>, <code>lastModifiedByUserID</code>, or <code>deletedByUserID</code>.</p>
+                    </div>
+
+                    <h3>Core Features</h3>
+                    <ul style="padding-left: 2rem; margin: 1rem 0;">
+                        <li><strong>Project Management:</strong> Create and manage production projects with custom fields</li>
+                        <li><strong>Step Management:</strong> Define production steps with QC requirements and inventory needs</li>
+                        <li><strong>Batch Production:</strong> Organize units into production batches with tracking</li>
+                        <li><strong>Unit Tracking:</strong> Track individual units through each production step</li>
+                        <li><strong>Inventory Management:</strong> Manage raw materials and components with stock tracking</li>
+                        <li><strong>Reporting:</strong> Analytics and dashboards for production insights</li>
+                    </ul>
+                </div>
+
+                <!-- Projects Section -->
+                <div id="projects" class="section">
+                    <h2>Project Management</h2>
+                    
+                    <div class="endpoint-group">
+                        <h3>Project Operations</h3>
+                        
+                        <!-- Get All Projects -->
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/projects</span>
+                                <span class="endpoint-description">Get all active projects</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <p><span class="status-code status-200">200</span>Returns array of active projects</p>
+                                    <div class="code-block">{
+  "success": true,
+  "message": "Projects retrieved successfully",
+  "data": [
+    {
+      "ProjectID": "uuid",
+      "ProjectCode": "PROJ001",
+      "ProjectName": "Widget Production",
+      "ProjectDescription": "Production of standard widgets",
+      "UnitFields": "Unit S/N",
+      "UnitSNPrefix": "WG",
+      "UnitSNFormat": "{PREFIX}{NUMBER:000}",
+      "CurrentProgress": 45.5,
+      "Status": "Active",
+      "DueDate": "2025-06-01",
+      "EstimatedTotalUnits": 1000,
+      "CreatedDate": "2025-01-01T00:00:00.000Z",
+      "IsActive": true
+    }
+  ]
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Get Project by ID -->
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/projects/{id}</span>
+                                <span class="endpoint-description">Get specific project by ID</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Path Parameters</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">id</span>
+                                            <span class="param-type">UUID</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">Project ID</div>
+                                    </div>
+                                </div>
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <p><span class="status-code status-200">200</span>Returns project details</p>
+                                    <p><span class="status-code status-404">404</span>Project not found</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Create Project -->
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method post">POST</span>
+                                <span class="endpoint-path">/projects</span>
+                                <span class="endpoint-description">Create new project</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Request Body</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">projectCode</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">Unique project code</div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">projectName</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">Project name</div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">unitSNPrefix</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">Prefix for unit serial numbers</div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">createdByUserID</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">ID of user creating the project</div>
+                                    </div>
+                                </div>
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <p><span class="status-code status-200">200</span>Project created successfully</p>
+                                    <p><span class="status-code status-400">400</span>Missing required fields or duplicate project code</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Update Project -->
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method put">PUT</span>
+                                <span class="endpoint-path">/projects/{id}</span>
+                                <span class="endpoint-description">Update existing project</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Request Body (all fields optional except lastModifiedByUserID)</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">lastModifiedByUserID</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">ID of user modifying the project</div>
+                                    </div>
+                                </div>
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <p><span class="status-code status-200">200</span>Project updated successfully</p>
+                                    <p><span class="status-code status-404">404</span>Project not found</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Delete Project -->
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method delete">DELETE</span>
+                                <span class="endpoint-path">/projects/{id}</span>
+                                <span class="endpoint-description">Soft delete project</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Request Body</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">deletedByUserID</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">ID of user deleting the project</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Steps Section -->
+                <div id="steps" class="section">
+                    <h2>Step Management</h2>
+                    
+                    <div class="endpoint-group">
+                        <h3>Project Steps</h3>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/projects/{id}/steps</span>
+                                <span class="endpoint-description">Get all steps for a project</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": [
+    {
+      "StepID": "uuid",
+      "ProjectID": "uuid",
+      "StepName": "Assembly",
+      "StepOrder": 1,
+      "StepDescription": "Assemble main components",
+      "EstimatedDurationMinutes": 30,
+      "RequiresQC": true,
+      "IsActive": true
+    }
+  ]
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method post">POST</span>
+                                <span class="endpoint-path">/projects/{id}/steps</span>
+                                <span class="endpoint-description">Add step to project</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Request Body</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">stepName</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">stepOrder</span>
+                                            <span class="param-type">integer</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">requiresQC</span>
+                                            <span class="param-type">boolean</span>
+                                        </div>
+                                        <div class="param-description">Default: false</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Batches Section -->
+                <div id="batches" class="section">
+                    <h2>Batch Management</h2>
+                    
+                    <div class="endpoint-group">
+                        <h3>Production Batches</h3>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/projects/{id}/batches</span>
+                                <span class="endpoint-description">Get batches for a project</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/batches?status={status}</span>
+                                <span class="endpoint-description">Get all batches with optional status filter</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Query Parameters</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">status</span>
+                                            <span class="param-type">string</span>
+                                        </div>
+                                        <div class="param-description">Filter by status: Pending, In Progress, Completed, On Hold</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/batches/{id}</span>
+                                <span class="endpoint-description">Get batch details with units</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": {
+    "BatchID": "uuid",
+    "BatchName": "Batch #001",
+    "ProjectCode": "PROJ001",
+    "ProjectName": "Widget Production",
+    "QuantityPlanned": 100,
+    "Status": "In Progress",
+    "units": [
+      {
+        "UnitID": "uuid",
+        "UnitSerialNumber": "WG001",
+        "Status": "In Progress",
+        "IsShipped": false
+      }
+    ]
+  }
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method post">POST</span>
+                                <span class="endpoint-path">/batches/{id}/units</span>
+                                <span class="endpoint-description">Add units to batch</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Request Body</h5>
+                                    <div class="code-block">{
+  "units": [
+    {
+      "unitSerialNumber": "WG001",
+      "unitData": {"field1": "value1"},
+      "status": "In Progress"
+    }
+  ],
+  "addedByUserID": "user123"
+}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Units Section -->
+                <div id="units" class="section">
+                    <h2>Unit Management</h2>
+                    
+                    <div class="endpoint-group">
+                        <h3>Unit Operations</h3>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/units/{id}</span>
+                                <span class="endpoint-description">Get unit details</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/units/{id}/progress</span>
+                                <span class="endpoint-description">Get unit step progress</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": [
+    {
+      "ProgressID": "uuid",
+      "StepName": "Assembly",
+      "StepOrder": 1,
+      "Status": "Complete",
+      "StartedDate": "2025-01-15T09:00:00.000Z",
+      "CompletedDate": "2025-01-15T09:30:00.000Z",
+      "RequiresQC": true,
+      "QCApprovedDate": "2025-01-15T10:00:00.000Z",
+      "Notes": "Completed successfully"
+    }
+  ]
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method put">PUT</span>
+                                <span class="endpoint-path">/units/{unitId}/steps/{stepId}</span>
+                                <span class="endpoint-description">Update unit step status</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Request Body</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">status</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">Status: Not Started, In Progress, Pending QC, Complete, Rework</div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">lastUpdatedByUserID</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method post">POST</span>
+                                <span class="endpoint-path">/units/bulk-progress</span>
+                                <span class="endpoint-description">Bulk update unit progress</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Request Body</h5>
+                                    <div class="code-block">{
+  "unitIds": ["uuid1", "uuid2", "uuid3"],
+  "stepId": "uuid",
+  "status": "Complete",
+  "updatedByUserID": "user123"
+}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Inventory Section -->
+                <div id="inventory" class="section">
+                    <h2>Inventory Management</h2>
+                    
+                    <div class="endpoint-group">
+                        <h3>Inventory Items</h3>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/inventory?category={category}</span>
+                                <span class="endpoint-description">Get all inventory items with optional category filter</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": [
+    {
+      "InventoryItemID": "uuid",
+      "ItemName": "Steel Bolt M8x20",
+      "PartNumber": "SB-M8-20",
+      "Category": "Fasteners",
+      "CurrentStock": 1500,
+      "UnitOfMeasure": "pieces",
+      "MinStockLevel": 100,
+      "MaxStockLevel": 2000,
+      "LotNumber": "LOT2025001",
+      "ExpirationDate": null
+    }
+  ]
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method post">POST</span>
+                                <span class="endpoint-path">/inventory</span>
+                                <span class="endpoint-description">Create new inventory item</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Request Body</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">itemName</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">unitOfMeasure</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">e.g., pieces, kg, liters, meters</div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">currentStock</span>
+                                            <span class="param-type">decimal</span>
+                                        </div>
+                                        <div class="param-description">Default: 0</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method post">POST</span>
+                                <span class="endpoint-path">/inventory/{id}/adjust</span>
+                                <span class="endpoint-description">Adjust inventory stock levels</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Request Body</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">quantityChange</span>
+                                            <span class="param-type">decimal</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">Positive for addition, negative for consumption</div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">reason</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">Reason for adjustment</div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">transactionType</span>
+                                            <span class="param-type">string</span>
+                                        </div>
+                                        <div class="param-description">Default: "Adjust". Options: Add, Consume, Adjust, Manual</div>
+                                    </div>
+                                </div>
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "message": "Inventory adjusted successfully",
+  "data": {
+    "previousStock": 100,
+    "newStock": 150,
+    "quantityChange": 50
+  }
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/inventory/{id}/transactions?limit={limit}</span>
+                                <span class="endpoint-description">Get inventory transaction history</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Query Parameters</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">limit</span>
+                                            <span class="param-type">integer</span>
+                                        </div>
+                                        <div class="param-description">Default: 50. Maximum number of transactions to return</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/inventory/low-stock</span>
+                                <span class="endpoint-description">Get items with low stock levels</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": [
+    {
+      "InventoryItemID": "uuid",
+      "ItemName": "Steel Bolt M8x20",
+      "CurrentStock": 50,
+      "MinStockLevel": 100,
+      "StockDeficit": 50,
+      "UnitOfMeasure": "pieces"
+    }
+  ]
+}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="endpoint-group">
+                        <h3>Step Inventory Requirements</h3>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/steps/{id}/inventory</span>
+                                <span class="endpoint-description">Get inventory requirements for a step</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": [
+    {
+      "RequirementID": "uuid",
+      "StepID": "uuid",
+      "InventoryItemID": "uuid",
+      "QuantityRequired": 2,
+      "ItemName": "Steel Bolt M8x20",
+      "PartNumber": "SB-M8-20",
+      "CurrentStock": 1500,
+      "UnitOfMeasure": "pieces"
+    }
+  ]
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method post">POST</span>
+                                <span class="endpoint-path">/steps/{id}/inventory</span>
+                                <span class="endpoint-description">Add inventory requirement to step</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Request Body</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">inventoryItemId</span>
+                                            <span class="param-type">UUID</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">quantityRequired</span>
+                                            <span class="param-type">decimal</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Reporting Section -->
+                <div id="reporting" class="section">
+                    <h2>Reporting & Analytics</h2>
+                    
+                    <div class="endpoint-group">
+                        <h3>Dashboard & Reports</h3>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/dashboard</span>
+                                <span class="endpoint-description">Get production dashboard data</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": {
+    "statistics": {
+      "ActiveProjects": 5,
+      "ActiveBatches": 12,
+      "TotalUnits": 1500,
+      "CompletedUnits": 850,
+      "ShippedUnits": 700,
+      "InventoryItems": 45,
+      "LowStockItems": 3
+    },
+    "recentActivity": [
+      {
+        "ActivityType": "Unit Progress",
+        "Description": "WG001 - Assembly (Complete)",
+        "ActivityDate": "2025-01-15T10:30:00.000Z",
+        "UserID": "user123"
+      }
+    ]
+  }
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/projects/{id}/summary</span>
+                                <span class="endpoint-description">Get project summary with statistics</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": {
+    "ProjectID": "uuid",
+    "ProjectCode": "PROJ001",
+    "ProjectName": "Widget Production",
+    "Status": "Active",
+    "EstimatedTotalUnits": 1000,
+    "TotalBatches": 3,
+    "TotalPlannedUnits": 300,
+    "TotalUnits": 250,
+    "CompletedUnits": 150,
+    "InProgressUnits": 100,
+    "ShippedUnits": 120,
+    "TotalSteps": 5,
+    "AvgStepDuration": 45.5
+  }
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/analytics/step-performance/{stepId}?startDate={date}&endDate={date}</span>
+                                <span class="endpoint-description">Get step performance analytics</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Query Parameters</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">startDate</span>
+                                            <span class="param-type">date</span>
+                                        </div>
+                                        <div class="param-description">Filter from date (YYYY-MM-DD)</div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">endDate</span>
+                                            <span class="param-type">date</span>
+                                        </div>
+                                        <div class="param-description">Filter to date (YYYY-MM-DD)</div>
+                                    </div>
+                                </div>
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": {
+    "StepName": "Assembly",
+    "EstimatedDurationMinutes": 30,
+    "CompletedCount": 150,
+    "AvgActualDurationMinutes": 28.5,
+    "MinDurationMinutes": 20,
+    "MaxDurationMinutes": 45,
+    "QCApprovedCount": 148
+  }
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/units/{id}/timeline</span>
+                                <span class="endpoint-description">Get unit progress timeline</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": [
+    {
+      "ProgressID": "uuid",
+      "Status": "Complete",
+      "StartedDate": "2025-01-15T09:00:00.000Z",
+      "CompletedDate": "2025-01-15T09:28:00.000Z",
+      "QCApprovedDate": "2025-01-15T10:00:00.000Z",
+      "StepName": "Assembly",
+      "StepOrder": 1,
+      "RequiresQC": true,
+      "EstimatedDurationMinutes": 30,
+      "ActualDurationMinutes": 28,
+      "Notes": "Completed successfully"
+    }
+  ]
+}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Utilities Section -->
+                <div id="utilities" class="section">
+                    <h2>Utilities</h2>
+                    
+                    <div class="endpoint-group">
+                        <h3>System Utilities</h3>
+                        
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/health</span>
+                                <span class="endpoint-description">API health check</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "message": "API is healthy",
+  "timestamp": "2025-05-24T12:00:00.000Z",
+  "database": "Connected"
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/categories?type={type}</span>
+                                <span class="endpoint-description">Get dropdown options and categories</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Query Parameters</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">type</span>
+                                            <span class="param-type">string</span>
+                                        </div>
+                                        <div class="param-description">Options: "inventory" for inventory categories, or omit for status enums</div>
+                                    </div>
+                                </div>
+                                <div class="response-section">
+                                    <h5>Response (when type not specified)</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": {
+    "projectStatuses": ["Active", "Inactive", "Archived", "Completed"],
+    "batchStatuses": ["Pending", "In Progress", "Completed", "On Hold"],
+    "unitStatuses": ["In Progress", "Completed", "Shipped", "Rework", "Hold"],
+    "stepStatuses": ["Not Started", "In Progress", "Pending QC", "Complete", "Rework"],
+    "transactionTypes": ["Add", "Consume", "Adjust", "Manual"]
+  }
+}</div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="endpoint">
+                            <div class="endpoint-header" onclick="toggleEndpoint(this)">
+                                <span class="method get">GET</span>
+                                <span class="endpoint-path">/search?q={query}&type={type}</span>
+                                <span class="endpoint-description">Global search across entities</span>
+                                <span class="toggle-icon">▼</span>
+                            </div>
+                            <div class="endpoint-details">
+                                <div class="params-section">
+                                    <h5>Query Parameters</h5>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">q</span>
+                                            <span class="param-type">string</span>
+                                            <span class="param-required">required</span>
+                                        </div>
+                                        <div class="param-description">Search term (minimum 2 characters)</div>
+                                    </div>
+                                    <div class="param">
+                                        <div class="param-header">
+                                            <span class="param-name">type</span>
+                                            <span class="param-type">string</span>
+                                        </div>
+                                        <div class="param-description">Options: all, projects, batches, units, inventory. Default: all</div>
+                                    </div>
+                                </div>
+                                <div class="response-section">
+                                    <h5>Response</h5>
+                                    <div class="code-block">{
+  "success": true,
+  "data": {
+    "projects": [
+      {
+        "ProjectID": "uuid",
+        "ProjectCode": "PROJ001",
+        "ProjectName": "Widget Production",
+        "ResultType": "project"
+      }
+    ],
+    "units": [
+      {
+        "UnitID": "uuid",
+        "UnitSerialNumber": "WG001",
+        "Status": "In Progress",
+        "BatchName": "Batch #001",
+        "ProjectCode": "PROJ001",
+        "ResultType": "unit"
+      }
+    ],
+    "inventory": [...],
+    "batches": [...]
+  }
+}</div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="info-box">
+                        <h4>🔄 Error Handling</h4>
+                        <p>All endpoints return consistent error responses:</p>
+                        <div class="code-block">{
+  "success": false,
+  "error": "Error message description",
+  "details": "Detailed error information"
+}</div>
+                        <p>Common HTTP status codes:</p>
+                        <ul style="margin-top: 0.5rem; padding-left: 1.5rem;">
+                            <li><strong>400:</strong> Bad Request - Missing required fields or invalid data</li>
+                            <li><strong>404:</strong> Not Found - Resource doesn't exist</li>
+                            <li><strong>500:</strong> Internal Server Error - Database or server issues</li>
+                        </ul>
+                    </div>
+
+                    <div class="warning-box">
+                        <h4>💾 Database Notes</h4>
+                        <ul style="padding-left: 1.5rem;">
+                            <li>Most deletions are "soft deletes" - records marked as inactive rather than removed</li>
+                            <li>All timestamps are in UTC format</li>
+                            <li>UUIDs are used for all primary keys</li>
+                            <li>Decimal fields support up to 4 decimal places for inventory quantities</li>
+                            <li>User tracking is required for all create/update/delete operations</li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // Navigation functionality
+        document.querySelectorAll('.nav-link').forEach(link => {
+            link.addEventListener('click', function(e) {
+                e.preventDefault();
+                
+                // Remove active class from all links and sections
+                document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
+                document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+                
+                // Add active class to clicked link
+                this.classList.add('active');
+                
+                // Show corresponding section
+                const targetId = this.getAttribute('href').substring(1);
+                document.getElementById(targetId).classList.add('active');
+            });
+        });
+
+        // Endpoint toggle functionality
+        function toggleEndpoint(header) {
+            const endpoint = header.parentElement;
+            endpoint.classList.toggle('expanded');
+        }
+
+        // Add click handlers to all endpoint headers
+        document.querySelectorAll('.endpoint-header').forEach(header => {
+            header.style.cursor = 'pointer';
+        });
+
+        // Smooth scrolling for anchor links
+        document.querySelectorAll('a[href^="#"]').forEach(anchor => {
+            anchor.addEventListener('click', function (e) {
+                e.preventDefault();
+                const target = document.querySelector(this.getAttribute('href'));
+                if (target) {
+                    target.scrollIntoView({
+                        behavior: 'smooth',
+                        block: 'start'
+                    });
+                }
+            });
+        });
+
+        // Auto-expand first endpoint in each section for demo
+        document.querySelectorAll('.section').forEach(section => {
+            const firstEndpoint = section.querySelector('.endpoint');
+            if (firstEndpoint) {
+                firstEndpoint.classList.add('expanded');
+            }
+        });
+    </script>
+</body>
+</html>
+                        
