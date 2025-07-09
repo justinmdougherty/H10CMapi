@@ -152,8 +152,66 @@ app.put('/api/projects/:id', async (req, res) => {
     await executeProcedure(res, 'usp_SaveProject', params);
 });
 
+// DELETE a project
+app.delete('/api/projects/:id', async (req, res) => {
+    try {
+        const pool = res.app.locals.db;
+        if (!pool) {
+            throw new Error("Database not connected. Check your configuration.");
+        }
+        
+        const projectId = parseInt(req.params.id, 10);
+        console.log(`Deleting project with ID: ${projectId}`);
+        
+        // Simple delete query - in production you'd want to handle cascading deletes
+        const result = await pool.request()
+            .input('project_id', sql.Int, projectId)
+            .query('DELETE FROM Projects WHERE project_id = @project_id');
+        
+        if (result.rowsAffected[0] === 0) {
+            return res.status(404).json({ error: 'Project not found' });
+        }
+        
+        res.status(200).json({ message: 'Project deleted successfully' });
+    } catch (error) {
+        console.error('Error deleting project:', error);
+        res.status(500).json({ error: 'Failed to delete project' });
+    }
+});
 
-// ... (The rest of your routes remain unchanged)
+// GET project attributes
+app.get('/api/projects/:projectId/attributes', async (req, res) => {
+    try {
+        const pool = res.app.locals.db;
+        if (!pool) {
+            throw new Error("Database not connected. Check your configuration.");
+        }
+        
+        const request = pool.request();
+        request.input('project_id', sql.Int, req.params.projectId);
+        
+        const result = await request.query(`
+            SELECT 
+                attribute_definition_id,
+                project_id,
+                attribute_name,
+                attribute_type,
+                display_order,
+                is_required
+            FROM AttributeDefinitions
+            WHERE project_id = @project_id
+            ORDER BY display_order
+        `);
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send(JSON.stringify(result.recordset, null, 2));
+        
+    } catch (error) {
+        console.error('Error getting project attributes:', error);
+        res.setHeader('Content-Type', 'application/json');
+        res.status(500).send(JSON.stringify({ error: error.message }, null, 2));
+    }
+});
 
 // =============================================================================
 // INVENTORY ITEMS
@@ -326,9 +384,9 @@ app.get('/api/projects/:projectId/tracked-items', async (req, res) => {
             }
         }
         
-        console.log(`🔍 API: Found ${trackedItems.length} tracked items, fetching attributes...`);
+        console.log(`🔍 API: Found ${trackedItems.length} tracked items, fetching attributes and step statuses...`);
         
-        // Now fetch attributes for each tracked item
+        // Now fetch attributes and step statuses for each tracked item
         for (let item of trackedItems) {
             try {
                 const attributesRequest = pool.request();
@@ -354,16 +412,39 @@ app.get('/api/projects/:projectId/tracked-items', async (req, res) => {
                     attribute_type: attr.attribute_type
                 }));
                 
-                console.log(`🔍 API: Item ${item.item_id} has ${item.attributes.length} attributes`);
+                // Get step statuses for the item
+                const stepStatusRequest = pool.request();
+                stepStatusRequest.input('item_id', sql.Int, item.item_id);
+                
+                const stepStatusResult = await stepStatusRequest.query(`
+                    SELECT 
+                        step_id as stepId,
+                        status,
+                        completion_timestamp,
+                        completed_by_user_name
+                    FROM dbo.TrackedItemStepProgress
+                    WHERE item_id = @item_id
+                `);
+                
+                // Add step_statuses array to the item
+                item.step_statuses = stepStatusResult.recordset.map(step => ({
+                    stepId: step.stepId,
+                    status: step.status,
+                    completion_timestamp: step.completion_timestamp,
+                    completed_by_user_name: step.completed_by_user_name
+                }));
+                
+                console.log(`🔍 API: Item ${item.item_id} has ${item.attributes.length} attributes and ${item.step_statuses.length} step statuses`);
                 
             } catch (attrError) {
-                console.warn(`❌ API: Failed to fetch attributes for item ${item.item_id}:`, attrError.message);
-                // Set empty attributes array if fetch fails
+                console.warn(`❌ API: Failed to fetch attributes or step statuses for item ${item.item_id}:`, attrError.message);
+                // Set empty arrays if fetch fails
                 item.attributes = [];
+                item.step_statuses = [];
             }
         }
         
-        console.log(`✅ API: Returning ${trackedItems.length} tracked items with attributes included`);
+        console.log(`✅ API: Returning ${trackedItems.length} tracked items with attributes and step statuses included`);
         
         res.setHeader('Content-Type', 'application/json');
         res.status(200).send(JSON.stringify({ data: trackedItems }, null, 2));
@@ -403,6 +484,14 @@ app.post('/api/tracked-items/:id/attributes', async (req, res) => {
 
 // POST to update the progress of a single step for a tracked item
 app.post('/api/tracked-items/:itemId/steps/:stepId', async (req, res) => {
+    req.body.item_id = parseInt(req.params.itemId, 10);
+    req.body.step_id = parseInt(req.params.stepId, 10);
+    const params = [{ name: 'ProgressJson', type: sql.NVarChar, value: JSON.stringify(req.body) }];
+    await executeProcedure(res, 'usp_UpdateTrackedItemStepProgress', params);
+});
+
+// PUT (Update) step progress for a tracked item - same functionality as POST for compatibility
+app.put('/api/tracked-items/:itemId/steps/:stepId', async (req, res) => {
     req.body.item_id = parseInt(req.params.itemId, 10);
     req.body.step_id = parseInt(req.params.stepId, 10);
     const params = [{ name: 'ProgressJson', type: sql.NVarChar, value: JSON.stringify(req.body) }];
