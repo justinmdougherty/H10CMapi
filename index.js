@@ -21,7 +21,7 @@ app.use(express.json());
 // -----------------------------------------------------------------------------
 const dbConfig = {
     user: "sa",
-    password: "0)Password",
+    password: "TFPMPassword123!",
     server: "127.0.0.1",
     database: "TFPM",
     port: 1433,
