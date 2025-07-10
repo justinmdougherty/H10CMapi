@@ -21,7 +21,7 @@ app.use(express.json());
 // -----------------------------------------------------------------------------
 const dbConfig = {
     user: "sa",
-    password: "TFPMPassword123!",
+    password: "0)Password",
     server: "127.0.0.1",
     database: "TFPM",
     port: 1433,
@@ -498,8 +498,111 @@ app.put('/api/tracked-items/:itemId/steps/:stepId', async (req, res) => {
     await executeProcedure(res, 'usp_UpdateTrackedItemStepProgress', params);
 });
 
+// POST to batch update step progress for multiple tracked items (DEADLOCK PREVENTION)
+app.post('/api/tracked-items/batch-step-progress', async (req, res) => {
+    try {
+        const { itemIds, stepId, status, completed_by_user_name } = req.body;
+        
+        if (!itemIds || !Array.isArray(itemIds) || itemIds.length === 0) {
+            return res.status(400).json({ error: 'itemIds array is required and must not be empty' });
+        }
+        
+        if (!stepId) {
+            return res.status(400).json({ error: 'stepId is required' });
+        }
+        
+        if (!status) {
+            return res.status(400).json({ error: 'status is required' });
+        }
 
-// =============================================================================
+        const pool = res.app.locals.db;
+        if (!pool) {
+            throw new Error("Database not connected. Check your configuration.");
+        }
+
+        console.log(`🔄 Processing batch step progress update for ${itemIds.length} items, step ${stepId}, status: ${status}`);
+        
+        const results = [];
+        const errors = [];
+        
+        // Process items sequentially to avoid deadlocks
+        for (const itemId of itemIds) {
+            const maxRetries = 3;
+            let retryCount = 0;
+            let success = false;
+            
+            while (retryCount < maxRetries && !success) {
+                try {
+                    const progressData = {
+                        item_id: parseInt(itemId, 10),
+                        step_id: parseInt(stepId, 10),
+                        status: status,
+                        completed_by_user_name: completed_by_user_name
+                    };
+                    
+                    const request = pool.request();
+                    request.input('ProgressJson', sql.NVarChar, JSON.stringify(progressData));
+                    
+                    await request.execute('usp_UpdateTrackedItemStepProgress');
+                    
+                    results.push({ itemId, success: true });
+                    success = true;
+                    console.log(`✅ Successfully updated item ${itemId}`);
+                    
+                } catch (error) {
+                    retryCount++;
+                    
+                    // Check if it's a deadlock error (error number 1205)
+                    if (error.number === 1205 && retryCount < maxRetries) {
+                        // Exponential backoff with jitter
+                        const baseDelay = 100 * Math.pow(2, retryCount - 1);
+                        const jitter = Math.random() * 50;
+                        const delay = baseDelay + jitter;
+                        
+                        console.log(`⚠️ Deadlock detected for item ${itemId}, retrying in ${Math.round(delay)}ms (attempt ${retryCount}/${maxRetries})`);
+                        await new Promise(resolve => setTimeout(resolve, delay));
+                        continue;
+                    }
+                    
+                    // If it's not a deadlock or we've exhausted retries, record the error
+                    console.error(`❌ Failed to update item ${itemId} after ${retryCount} attempts:`, error.message);
+                    errors.push({ 
+                        itemId, 
+                        error: error.message, 
+                        attempts: retryCount 
+                    });
+                    break;
+                }
+            }
+        }
+        
+        const response = {
+            success: results.length,
+            failed: errors.length,
+            total: itemIds.length,
+            results,
+            errors: errors.length > 0 ? errors : undefined
+        };
+        
+        console.log(`📊 Batch update completed: ${results.length}/${itemIds.length} successful`);
+        
+        // Return success if at least some items were updated
+        if (results.length > 0) {
+            res.status(200).json(response);
+        } else {
+            res.status(500).json(response);
+        }
+        
+    } catch (error) {
+        console.error('❌ Error in batch step progress update:', error);
+        res.status(500).json({ 
+            error: 'Failed to process batch step progress update',
+            details: error.message 
+        });
+    }
+});
+
+// -----------------------------------------------------------------------------
 // VIEW ENDPOINTS
 // =============================================================================
 const executeView = async (res, viewName) => {
