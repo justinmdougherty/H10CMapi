@@ -695,6 +695,180 @@ app.get('/api/views/inventory-stock-status', (req, res) => executeView(res, 'v_I
 app.get('/api/views/tracked-items-overview', (req, res) => executeView(res, 'v_TrackedItems_Overview'));
 app.get('/api/views/step-progress-status', (req, res) => executeView(res, 'v_TrackedItemStepProgress_Status'));
 
+// =============================================================================
+// NOTIFICATIONS
+// =============================================================================
+
+// GET all notifications for the current user
+app.get('/api/notifications', async (req, res) => {
+    try {
+        const { 
+            isRead, 
+            category, 
+            type, 
+            actionRequired, 
+            limit = 50, 
+            offset = 0 
+        } = req.query;
+
+        // TODO: Implement database storage for notifications
+        // For now, return an example structure
+        const notifications = [
+            {
+                id: 'notif_' + Date.now(),
+                type: 'warning',
+                category: 'inventory',
+                title: 'Low Stock Alert',
+                message: 'RK73Z1HTTC resistor is running low (5 pieces remaining)',
+                timestamp: new Date(),
+                isRead: false,
+                isImportant: true,
+                actionRequired: true,
+                relatedEntityType: 'inventory',
+                relatedEntityId: 123,
+                actionUrl: '/inventory/123',
+                actionLabel: 'Reorder Now',
+                icon: '📦'
+            }
+        ];
+
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send(JSON.stringify(notifications, null, 2));
+    } catch (error) {
+        console.error('Error fetching notifications:', error);
+        res.status(500).json({ error: 'Failed to fetch notifications' });
+    }
+});
+
+// POST create a new notification
+app.post('/api/notifications', async (req, res) => {
+    try {
+        const {
+            type,
+            category, 
+            title,
+            message,
+            isImportant = false,
+            actionRequired = false,
+            relatedEntityType,
+            relatedEntityId,
+            actionUrl,
+            actionLabel,
+            metadata = {},
+            expiresAt,
+            userId
+        } = req.body;
+
+        // TODO: Implement database storage
+        const notification = {
+            id: 'notif_' + Date.now() + '_' + Math.random().toString(36).substr(2, 9),
+            type,
+            category,
+            title,
+            message,
+            timestamp: new Date(),
+            isRead: false,
+            isImportant,
+            actionRequired,
+            relatedEntityType,
+            relatedEntityId,
+            actionUrl,
+            actionLabel,
+            metadata,
+            expiresAt: expiresAt ? new Date(expiresAt) : null,
+            userId: userId || 'system'
+        };
+
+        console.log(`📧 Notification Created: [${category}] ${title}`);
+        
+        res.setHeader('Content-Type', 'application/json');
+        res.status(201).send(JSON.stringify(notification, null, 2));
+    } catch (error) {
+        console.error('Error creating notification:', error);
+        res.status(500).json({ error: 'Failed to create notification' });
+    }
+});
+
+// PATCH mark notification as read
+app.patch('/api/notifications/:id/read', async (req, res) => {
+    try {
+        const notificationId = req.params.id;
+        
+        // TODO: Update in database
+        console.log(`📖 Notification marked as read: ${notificationId}`);
+        
+        res.status(200).json({ success: true, message: 'Notification marked as read' });
+    } catch (error) {
+        console.error('Error marking notification as read:', error);
+        res.status(500).json({ error: 'Failed to update notification' });
+    }
+});
+
+// PATCH mark all notifications as read
+app.patch('/api/notifications/mark-all-read', async (req, res) => {
+    try {
+        // TODO: Update all in database for user
+        console.log('📖 All notifications marked as read');
+        
+        res.status(200).json({ success: true, message: 'All notifications marked as read' });
+    } catch (error) {
+        console.error('Error marking all notifications as read:', error);
+        res.status(500).json({ error: 'Failed to update notifications' });
+    }
+});
+
+// DELETE a notification
+app.delete('/api/notifications/:id', async (req, res) => {
+    try {
+        const notificationId = req.params.id;
+        
+        // TODO: Delete from database
+        console.log(`🗑️ Notification deleted: ${notificationId}`);
+        
+        res.status(200).json({ success: true, message: 'Notification deleted' });
+    } catch (error) {
+        console.error('Error deleting notification:', error);
+        res.status(500).json({ error: 'Failed to delete notification' });
+    }
+});
+
+// GET notification summary/stats
+app.get('/api/notifications/summary', async (req, res) => {
+    try {
+        // TODO: Calculate from database
+        const summary = {
+            total: 15,
+            unread: 5,
+            critical: 2,
+            actionRequired: 3,
+            byCategory: {
+                inventory: 8,
+                orders: 4,
+                production: 2,
+                quality: 0,
+                system: 1,
+                user: 0,
+                deadlines: 0,
+                approvals: 0
+            },
+            byType: {
+                success: 3,
+                warning: 7,
+                error: 2,
+                info: 2,
+                critical: 1,
+                reminder: 0
+            }
+        };
+
+        res.setHeader('Content-Type', 'application/json');
+        res.status(200).send(JSON.stringify(summary, null, 2));
+    } catch (error) {
+        console.error('Error fetching notification summary:', error);
+        res.status(500).json({ error: 'Failed to fetch notification summary' });
+    }
+});
+
 
 // -----------------------------------------------------------------------------
 // START SERVER (only if not in test environment)
