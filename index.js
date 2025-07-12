@@ -90,6 +90,38 @@ app.get('/', (req, res) => {
     res.send('TFPM API is running!');
 });
 
+// Health check endpoints for testing
+app.get('/api/health', (req, res) => {
+    res.status(200).json({
+        status: 'OK',
+        timestamp: new Date().toISOString(),
+        uptime: process.uptime()
+    });
+});
+
+app.get('/api/health/db', async (req, res) => {
+    try {
+        const pool = app.locals.db;
+        if (pool && pool.connected) {
+            res.status(200).json({
+                database: 'connected',
+                timestamp: new Date().toISOString()
+            });
+        } else {
+            res.status(503).json({
+                database: 'disconnected',
+                timestamp: new Date().toISOString()
+            });
+        }
+    } catch (error) {
+        res.status(503).json({
+            database: 'error',
+            error: error.message,
+            timestamp: new Date().toISOString()
+        });
+    }
+});
+
 // =============================================================================
 // PROJECTS
 // =============================================================================
@@ -627,8 +659,13 @@ app.get('/api/views/step-progress-status', (req, res) => executeView(res, 'v_Tra
 
 
 // -----------------------------------------------------------------------------
-// START SERVER
+// START SERVER (only if not in test environment)
 // -----------------------------------------------------------------------------
-app.listen(PORT, () => {
-    console.log(`Server is running on http://localhost:${PORT}`);
-});
+if (process.env.NODE_ENV !== 'test') {
+    app.listen(PORT, () => {
+        console.log(`Server is running on http://localhost:${PORT}`);
+    });
+}
+
+// Export the app for testing
+module.exports = app;
