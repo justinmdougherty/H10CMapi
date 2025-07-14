@@ -43,10 +43,7 @@ sql.connect(dbConfig).then(pool => {
 // AUTHENTICATION & AUTHORIZATION MIDDLEWARE
 // -----------------------------------------------------------------------------
 
-//const DEFAULT_USER_CERT = "MIIFRDCCBCygAwIBAgIDBnVHMA0GCSqGSIb3DQEBCwUAMFoxCzAJBgNVBAYTAlVTMRgwFgYDVQQKEw9VLlMuIEdvdmVybm1lbnQxDDAKBgNVBAsTA0RvRDEMMAoGA1UECxMDUEtJMRUwEwYDVQQDEwxET0QgSUQgQ0EtNzMwHhcNMjQwNzA5MDAwMDAwWhcNMjcwNzA4MjM1OTU5WjB/MQswCQYDVQQGEwJVUzEYMBYGA1UEChMPVS5TLiBHb3Zlcm5tZW50MQwwCgYDVQQLEwNEb0QxDDAKBgNVBAsTA1BLSTEMMAoGA1UECxMDVVNOMSwwKgYDVQQDEyNET1VHSEVSVFkuSlVTVElOLk1JQ0hBRUwuMTI1MDIyNzIyODCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJ98y7xGmNrfVUtSA85i9EzyFfzpWLZvQfWv3KMvE9tdvjYLpi9wf1Mm440NZSdsn+VBSruZyb7s7EWa9Jiw19A4AsHHTm0PDUmIt5WbGPcXsszc/6eL/VEsR2V/gp5mhl96Az5ct/fMIslFhh5UX+H7ma8K56Hwir1vIc/Be80fQBulMwzGHz0vWOyQ0AWDtLWf6VdpYJV+Vjv0SC+H3pgIbEZL91Vwwmd1i8PzHi5BojfQIhI64IQuKqyPcZrLgmA3trNpHPJP8hdw4fe8I+N6TAjH/NkaB2BICis5pIbnmlrUyac60jr9qtavfBNfjtHTC9NQtQSv7+oQzMvqL5kCAwEAAaOCAewwggHoMB8GA1UdIwQYMBaAFOkhe/IUbzhViHqgUAmekXIcS9k7MDcGA1UdHwQwMC4wLKAqoCiGJmh0dHA6Ly9jcmwuZGlzYS5taWwvY3JsL0RPRElEQ0FfNzMuY3JsMA4GA1UdDwEB/wQEAwIHgDAkBgNVHSAEHTAbMAsGCWCGSAFlAgELKjAMBgpghkgBZQMCAQMNMB0GA1UdDgQWBBTjksZ1APK0JkryT88aMZw9hGjSvDBlBggrBgEFBQcBAQRZMFcwMwYIKwYBBQUHMAKGJ2h0dHA6Ly9jcmwuZGlzYS5taWwvc2lnbi9ET0RJRENBXzczLmNlcjAgBggrBgEFBQcwAYYUaHR0cDovL29jc3AuZGlzYS5taWwwgYgGA1UdEQSBgDB+oCcGCGCGSAFlAwYGoBsEGdT4ENs8CGwUVIGtg2DaCKhQjiEChDgQo/OgJAYKkwYBBAGCNxQCA6AWDBQxMjUwMjI3MjI4MTE3MDAyQG1pbIYtdXJuOnV1aWQ6QTQ4NkZFRTctNDE4NS00NTAyLUEzOTQtRDVERUNDRUJBNkUzMBsGA1UdCQQUMBIwEAYIKwYBBQUHCQQxBBMCVVMwKAYDVR0lBCEwHwYKKwYBBAGCNxQCAgYIKwYBBQUHAwIGBysGAQUCAwQwDQYJKoZIhvcNAQELBQADggEBAFc6ZODAlHhmEInPE9vnPpGOYBaFhQ06RDDxft3UDKn9oxB0gxogFAs/5kMIJE+wn9mjazLH/B2VnizUfXarFZcPCP3aziNeVAWH/ZjqMq8PxUvV1PJdVxVJu1cU6XberkTs5dgHNSlAb39Qdl/OQANERHa1pUdCgHscIeGl2TrvprzXD3zf0WsFI57hNeil6KUazf3u3pXuN2P00cv3ryEOw7CzC2IO0Q61Yn/vAjCprVh3IhoIkF0yPrYhUiP5qqTLyhynDynnDYwbnt/ZGQYaLiC+gNFxZwkQJtGHVXlb7WOW0zRZI3QaBSielwK1eawfdq/J2SCtT3YHriwKeaI=";
-
-// Development fallback certificate for testing without real certs
-const DEFAULT_DEVELOPMENT_CERT = "development-fallback";
+const DEFAULT_USER_CERT = "MIIFRDCCBCygAwIBAgIDBnVHMA0GCSqGSIb3DQEBCwUAMFoxCzAJBgNVBAYTAlVTMRgwFgYDVQQKEw9VLlMuIEdvdmVybm1lbnQxDDAKBgNVBAsTA0RvRDEMMAoGA1UECxMDUEtJMRUwEwYDVQQDEwxET0QgSUQgQ0EtNzMwHhcNMjQwNzA5MDAwMDAwWhcNMjcwNzA4MjM1OTU5WjB/MQswCQYDVQQGEwJVUzEYMBYGA1UEChMPVS5TLiBHb3Zlcm5tZW50MQwwCgYDVQQLEwNEb0QxDDAKBgNVBAsTA1BLSTEMMAoGA1UECxMDVVNOMSwwKgYDVQQDEyNET1VHSEVSVFkuSlVTVElOLk1JQ0hBRUwuMTI1MDIyNzIyODCCASIwDQYJKoZIhvcNAQEBBQADggEPADCCAQoCggEBAJ98y7xGmNrfVUtSA85i9EzyFfzpWLZvQfWv3KMvE9tdvjYLpi9wf1Mm440NZSdsn+VBSruZyb7s7EWa9Jiw19A4AsHHTm0PDUmIt5WbGPcXsszc/6eL/VEsR2V/gp5mhl96Az5ct/fMIslFhh5UX+H7ma8K56Hwir1vIc/Be80fQBulMwzGHz0vWOyQ0AWDtLWf6VdpYJV+Vjv0SC+H3pgIbEZL91Vwwmd1i8PzHi5BojfQIhI64IQuKqyPcZrLgmA3trNpHPJP8hdw4fe8I+N6TAjH/NkaB2BICis5pIbnmlrUyac60jr9qtavfBNfjtHTC9NQtQSv7+oQzMvqL5kCAwEAAaOCAewwggHoMB8GA1UdIwQYMBaAFOkhe/IUbzhViHqgUAmekXIcS9k7MDcGA1UdHwQwMC4wLKAqoCiGJmh0dHA6Ly9jcmwuZGlzYS5taWwvY3JsL0RPRElEQ0FfNzMuY3JsMA4GA1UdDwEB/wQEAwIHgDAkBgNVHSAEHTAbMAsGCWCGSAFlAgELKjAMBgpghkgBZQMCAQMNMB0GA1UdDgQWBBTjksZ1APK0JkryT88aMZw9hGjSvDBlBggrBgEFBQcBAQRZMFcwMwYIKwYBBQUHMAKGJ2h0dHA6Ly9jcmwuZGlzYS5taWwvc2lnbi9ET0RJRENBXzczLmNlcjAgBggrBgEFBQcwAYYUaHR0cDovL29jc3AuZGlzYS5taWwwgYgGA1UdEQSBgDB+oCcGCGCGSAFlAwYGoBsEGdT4ENs8CGwUVIGtg2DaCKhQjiEChDgQo/OgJAYKKwYBBAGCNxQCA6AWDBQxMjUwMjI3MjI4MTE3MDAyQG1pbIYtdXJuOnV1aWQ6QTQ4NkZFRTctNDE4NS00NTAyLUEzOTQtRDVERUNDRUJBNkUzMBsGA1UdCQQUMBIwEAYIKwYBBQUHCQQxBBMCVVMwKAYDVR0lBCEwHwYKKwYBBAGCNxQCAgYIKwYBBQUHAwIGBysGAQUCAwQwDQYJKoZIhvcNAQELBQADggEBAFc6ZODAlHhmEInPE9vnPpGOYBaFhQ06RDDxft3UDKn9oxB0gxogFAs/5kMIJE+wn9mjazLH/B2VnizUfXarFZcPCP3aziNeVAWH/ZjqMq8PxUvV1PJdVxVJu1cU6XberkTs5dgHNSlAb39Qdl/OQANERHa1pUdCgHscIeGl2TrvprzXD3zf0WsFI57hNeil6KUazf3u3pXuN2P00cv3ryEOw7CzC2IO0Q61Yn/vAjCprVh3IhoIkF0yPrYhUiP5qqTLyhynDynnDYwbnt/ZGQYaLiC+gNFxZwkQJtGHVXlb7WOW0zRZI3QaBSielwK1eawfdq/J2SCtT3YHriwKeaI=";
 
 // Extract user information from certificate and get their program access
 const authenticateUser = async (req, res, next) => {
@@ -56,8 +53,8 @@ const authenticateUser = async (req, res, next) => {
             return res.status(500).json({ error: 'Database not connected' });
         }
 
-        // Get certificate from header or use development fallback
-        const clientCert = req.headers['x-arr-clientcert'] || DEFAULT_DEVELOPMENT_CERT;
+        // Get certificate from header or use default
+        const clientCert = req.headers['x-arr-clientcert'] || DEFAULT_USER_CERT;
         
         // Extract certificate subject (simplified for this example)
         const certSubject = extractCertificateSubject(clientCert);
@@ -136,13 +133,8 @@ const checkProgramAccess = (requiredLevel = 'Read') => {
 
 // Helper function to extract certificate subject (simplified)
 const extractCertificateSubject = (cert) => {
-    // If using development fallback, return development user subject
-    if (cert === DEFAULT_DEVELOPMENT_CERT) {
-        return "CN=development-user,OU=Development,OU=Test,O=Development,C=US";
-    }
-    
     // In a real implementation, you'd parse the actual certificate
-    // For production, return the real certificate subject
+    // For now, return a default subject for development
     return "CN=DOUGHERTY.JUSTIN.MICHAEL.1250227228,OU=USN,OU=PKI,OU=DoD,O=U.S. Government,C=US";
 };
 
@@ -279,49 +271,9 @@ app.get("/api/auth/me", authenticateUser, (req, res) => {
 // PROGRAM MANAGEMENT ENDPOINTS (ADMIN ONLY)
 // =============================================================================
 
-// GET all programs (conditional authentication for initial setup)
-app.get('/api/programs', async (req, res) => {
+// GET all programs (Admin only or filtered by user access)
+app.get('/api/programs', authenticateUser, async (req, res) => {
     try {
-        const pool = req.app.locals.db;
-        if (!pool) {
-            return res.status(500).json({ error: 'Database not connected' });
-        }
-
-        // Check if any programs exist first
-        const programCountResult = await pool.request()
-            .query('SELECT COUNT(*) as program_count FROM Programs WHERE is_active = 1');
-        
-        const hasPrograms = programCountResult.recordset[0].program_count > 0;
-        
-        if (!hasPrograms) {
-            // No programs exist, allow unauthenticated access for initial setup
-            return res.json([]);
-        }
-
-        // Programs exist, check authentication
-        const authHeader = req.headers.authorization;
-        if (!authHeader) {
-            // No auth provided and it's not an initial setup, require authentication
-            return res.status(401).json({ error: 'Authentication required' });
-        }
-
-        // Try authentication, but continue if it fails (for initial setup)
-        try {
-            await new Promise((resolve, reject) => {
-                authenticateUser(req, res, (error) => {
-                    if (error) {
-                        reject(error);
-                    } else {
-                        resolve();
-                    }
-                });
-            });
-        } catch (authError) {
-            // Authentication failed, but allow for setup purposes
-            return res.status(401).json({ error: 'Authentication failed' });
-        }
-
-        // Authentication successful, proceed with filtered results
         let query = `
             SELECT program_id, program_name, program_code, program_description, 
                    is_active, date_created, program_manager
@@ -336,44 +288,27 @@ app.get('/api/programs', async (req, res) => {
         
         query += ` ORDER BY program_name`;
         
-        const result = await pool.request().query(query);
-        res.json(result.recordset);
+        await executeQuery(req, res, query);
     } catch (error) {
         console.error('Error getting programs:', error);
         res.status(500).json({ error: 'Failed to get programs' });
     }
 });
 
-// POST create new program (conditional authentication for initial setup)
-app.post('/api/programs', async (req, res) => {
-    try {
-        const pool = req.app.locals.db;
-        if (!pool) {
-            return res.status(500).json({ error: 'Database not connected' });
-        }
-
-        // Check if any programs exist
-        const programCountResult = await pool.request()
-            .query('SELECT COUNT(*) as program_count FROM Programs WHERE is_active = 1');
-        
-        const hasPrograms = programCountResult.recordset[0].program_count > 0;
-        
-        if (hasPrograms) {
-            // Programs exist, require authentication
-            return authenticateUser(req, res, async () => {
-                if (!req.user.is_system_admin) {
-                    return res.status(403).json({ error: 'System Admin access required' });
-                }
-                await createProgramLogic(req, res, pool);
-            });
-        } else {
-            // No programs exist, allow creation for initial setup
-            await createProgramLogic(req, res, pool);
-        }
-    } catch (error) {
-        console.error('Error in create program endpoint:', error);
-        res.status(500).json({ error: 'Failed to process request' });
+// POST create new program (System Admin only)
+app.post('/api/programs', authenticateUser, async (req, res) => {
+    if (!req.user.is_system_admin) {
+        return res.status(403).json({ error: 'System Admin access required' });
     }
+    
+    const { program_name, program_code, program_description } = req.body;
+    const params = [
+        { name: 'ProgramName', type: sql.NVarChar, value: program_name },
+        { name: 'ProgramCode', type: sql.NVarChar, value: program_code },
+        { name: 'ProgramDescription', type: sql.NVarChar, value: program_description },
+        { name: 'CreatedBy', type: sql.NVarChar, value: req.user.user_name }
+    ];
+    await executeProcedure(res, 'usp_AddNewTenant', params);
 });
 
 // POST grant program access to user (System Admin only)
@@ -392,34 +327,31 @@ app.post('/api/programs/:programId/access', authenticateUser, async (req, res) =
     await executeProcedure(res, 'usp_GrantProgramAccess', params);
 });
 
-// GET users with their program access (conditional authentication for initial setup)
-app.get('/api/users', async (req, res) => {
+// GET users with their program access (Admin only)
+app.get('/api/users', authenticateUser, async (req, res) => {
+    if (!req.user.is_system_admin) {
+        return res.status(403).json({ error: 'System Admin access required' });
+    }
+    
     try {
-        const pool = req.app.locals.db;
-        if (!pool) {
-            return res.status(500).json({ error: 'Database not connected' });
-        }
-
-        // Check if any system admins exist
-        const adminCheckResult = await pool.request()
-            .query('SELECT COUNT(*) as admin_count FROM Users WHERE is_system_admin = 1 AND is_active = 1');
+        const query = `
+            SELECT u.user_id, u.user_name, u.display_name, u.email, u.is_active, u.is_system_admin,
+                   u.last_login, u.date_created,
+                   JSON_QUERY((
+                       SELECT pa.program_id, pa.access_level, p.program_name
+                       FROM ProgramAccess pa 
+                       JOIN Programs p ON pa.program_id = p.program_id
+                       WHERE pa.user_id = u.user_id AND pa.is_active = 1
+                       FOR JSON PATH
+                   )) as program_access
+            FROM Users u
+            WHERE u.is_active = 1
+            ORDER BY u.display_name
+        `;
         
-        const hasAdmins = adminCheckResult.recordset[0].admin_count > 0;
-        
-        if (hasAdmins) {
-            // Admins exist, require authentication
-            return authenticateUser(req, res, async () => {
-                if (!req.user.is_system_admin) {
-                    return res.status(403).json({ error: 'System Admin access required' });
-                }
-                await getUsersLogic(req, res, pool);
-            });
-        } else {
-            // No admins exist, allow unauthenticated access for setup check
-            await getUsersLogic(req, res, pool);
-        }
+        await executeQuery(req, res, query);
     } catch (error) {
-        console.error('Error in users endpoint:', error);
+        console.error('Error getting users:', error);
         res.status(500).json({ error: 'Failed to get users' });
     }
 });
@@ -749,157 +681,6 @@ app.get('/api/health/db', async (req, res) => {
         });
     }
 });
-
-// =============================================================================
-// SYSTEM SETUP ENDPOINTS (ADMIN ONLY)
-// =============================================================================
-
-// POST create user (System Admin only - for initial setup)
-app.post('/api/admin/create-user', async (req, res) => {
-    try {
-        const pool = req.app.locals.db;
-        if (!pool) {
-            return res.status(500).json({ error: 'Database not connected' });
-        }
-
-        // For initial setup, check if any system admin exists
-        const adminCheckResult = await pool.request()
-            .query('SELECT COUNT(*) as admin_count FROM Users WHERE is_system_admin = 1 AND is_active = 1');
-        
-        const hasAdmins = adminCheckResult.recordset[0].admin_count > 0;
-        
-        // If admins exist, require authentication
-        if (hasAdmins) {
-            // Run authentication middleware
-            return authenticateUser(req, res, async () => {
-                if (!req.user.is_system_admin) {
-                    return res.status(403).json({ error: 'System Admin access required' });
-                }
-                await createUserLogic(req, res, pool);
-            });
-        } else {
-            // No admins exist, allow creation for initial setup
-            await createUserLogic(req, res, pool);
-        }
-    } catch (error) {
-        console.error('Error in create user endpoint:', error);
-        res.status(500).json({ error: 'Failed to process request' });
-    }
-});
-
-// Helper function for user creation logic
-const createUserLogic = async (req, res, pool) => {
-    const { 
-        user_name, 
-        display_name, 
-        email, 
-        certificate_subject, 
-        is_system_admin = false 
-    } = req.body;
-
-    try {
-        // Insert user into database
-        const insertUserQuery = `
-            INSERT INTO Users (user_name, display_name, email, certificate_subject, is_system_admin, is_active, date_created)
-            VALUES (@user_name, @display_name, @email, @certificate_subject, @is_system_admin, 1, GETDATE());
-            SELECT SCOPE_IDENTITY() AS user_id;
-        `;
-
-        const result = await pool.request()
-            .input('user_name', sql.NVarChar, user_name)
-            .input('display_name', sql.NVarChar, display_name)
-            .input('email', sql.NVarChar, email)
-            .input('certificate_subject', sql.NVarChar, certificate_subject)
-            .input('is_system_admin', sql.Bit, is_system_admin)
-            .query(insertUserQuery);
-
-        const newUserId = result.recordset[0].user_id;
-
-        res.json({
-            message: 'User created successfully',
-            user_id: newUserId,
-            user_name,
-            display_name,
-            is_system_admin
-        });
-
-    } catch (error) {
-        console.error('Error creating user:', error);
-        if (error.message.includes('duplicate') || error.message.includes('unique')) {
-            res.status(400).json({ error: 'User already exists' });
-        } else {
-            res.status(500).json({ error: 'Failed to create user' });
-        }
-    }
-};
-
-// Helper function for users logic
-const getUsersLogic = async (req, res, pool) => {
-    try {
-        const query = `
-            SELECT u.user_id, u.user_name, u.display_name, u.email, u.is_active, u.is_system_admin,
-                   u.last_login, u.date_created,
-                   JSON_QUERY((
-                       SELECT pa.program_id, pa.access_level, p.program_name
-                       FROM ProgramAccess pa 
-                       JOIN Programs p ON pa.program_id = p.program_id
-                       WHERE pa.user_id = u.user_id AND pa.is_active = 1
-                       FOR JSON PATH
-                   )) as program_access
-            FROM Users u
-            WHERE u.is_active = 1
-            ORDER BY u.display_name
-        `;
-        
-        const result = await pool.request().query(query);
-        res.json(result.recordset);
-    } catch (error) {
-        console.error('Error getting users:', error);
-        res.status(500).json({ error: 'Failed to get users' });
-    }
-};
-
-// Helper function for program creation logic
-const createProgramLogic = async (req, res, pool) => {
-    const { program_name, program_code, program_description } = req.body;
-    
-    try {
-        const params = [
-            { name: 'ProgramName', type: sql.NVarChar, value: program_name },
-            { name: 'ProgramCode', type: sql.NVarChar, value: program_code },
-            { name: 'ProgramDescription', type: sql.NVarChar, value: program_description },
-            { name: 'CreatedBy', type: sql.NVarChar, value: req.user ? req.user.user_name : 'System' }
-        ];
-        
-        const request = pool.request();
-        params.forEach(param => {
-            request.input(param.name, param.type, param.value);
-        });
-
-        const result = await request.execute('usp_AddNewTenant');
-        
-        res.setHeader('Content-Type', 'application/json');
-
-        if (result.recordset && result.recordset.length > 0 && result.recordset[0][Object.keys(result.recordset[0])[0]]) {
-            const jsonResultString = result.recordset[0][Object.keys(result.recordset[0])[0]];
-            const data = JSON.parse(jsonResultString);
-            
-            if (data.error) {
-                return res.status(400).send(JSON.stringify(data, null, 2));
-            }
-            if (data.SuccessMessage || data.WarningMessage) {
-                return res.status(200).send(JSON.stringify(data, null, 2));
-            }
-            
-            res.status(200).send(JSON.stringify(data, null, 2));
-        } else {
-            res.status(200).send(JSON.stringify({ message: 'Program created successfully' }, null, 2));
-        }
-    } catch (error) {
-        console.error('Error creating program:', error);
-        res.status(500).json({ error: 'Failed to create program' });
-    }
-};
 
 // Start server
 app.listen(PORT, () => {
